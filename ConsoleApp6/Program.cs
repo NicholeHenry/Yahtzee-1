@@ -1,74 +1,104 @@
 ﻿using System;
 
-namespace ConsoleApp6
+namespace Yahtzee
 {
     class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("Yahtzee!!");
-            int[] firstRoll = RollDice(5);
+            int playerScore = GetPlayerScore();
+            int computerScore = GetComputerScore();
+           
 
-            int[] savefirstRollDice = DisplayAndSave(firstRoll);
-
-            Console.WriteLine("End of first roll. Start next roll.");
-
-            int[] secondRoll = RollDice(5 - savefirstRollDice.Length);
-
-            int[] savesecondRollDice = DisplayAndSave(secondRoll);
-
-            int[] thridRoll = RollDice(5 - savefirstRollDice.Length - savesecondRollDice.Length);
-
-            int[] savethridRollDice = DisplayAndSave(thridRoll);
-
-            int finalScore = Score(savefirstRollDice, savesecondRollDice, savethridRollDice);
-
-
-          
-
-
-
+            string winner = computerScore > playerScore ? "computer" : "player";
+            Console.WriteLine($"The {winner} wins!");
             Console.ReadLine();
+                        
+        }
 
+        public static int GetComputerScore()
+        {
+            {
+                int maxScore = 0;
+                for (int i = 0; i < 3; i++)
+                {
+                    int[] rolls = RollDice(5);
+                    int score = Score(rolls);
 
+                    if (score > maxScore)
+                        maxScore = score;
+                    Console.WriteLine(" "); 
 
-            //Console.WriteLine("The score for player: {0}", playerscore);
-            //Console.WriteLine ("The score for computer is: {0}", compturescore)
-            Console.ReadLine();
+                }
+                Console.WriteLine("Compture final: " +maxScore);
+                return maxScore;
+            }
 
         }
+
+        public static int GetPlayerScore ()
+            {
+                int[] firstRoll = RollDice(5);
+                int[] savefirstRollDice = DisplayAndSave(firstRoll);
+
+                Console.WriteLine("End of roll. Next roll.");
+                Console.Clear();
+
+
+                int[] secondRoll = RollDice(5 - savefirstRollDice.Length);
+                int[] savesecondRollDice = DisplayAndSave(secondRoll);
+
+                Console.WriteLine("End of roll. Next roll.");
+                Console.Clear();
+
+
+                int[] thridRoll = RollDice(5 - savefirstRollDice.Length - savesecondRollDice.Length);
+                int[] savethridRollDice = DisplayAndSave(thridRoll);
+                Console.Clear();
+
+                int[] playercombo = PlayerComboforScore(savefirstRollDice, savesecondRollDice, savethridRollDice);
+
+                int finalScore = Score(playercombo);
+                Console.WriteLine("Player fianl score: " + finalScore);
+                Console.ReadLine();
+               return finalScore;
+            }
+           
+        
         public static int[] RollDice(int numberOfdice)
         {
-            
-                int[] numbers = new int[numberOfdice];
-                Random random = new Random();
-                for (int j = 0; j < numberOfdice; j++)
-                    {
-                        numbers[j] = random.Next(1,7);                       
-                    }
-            return numbers;     
- 
+            int[] numbers = new int[numberOfdice];
+            Random random = new Random();
+            for (int j = 0; j < numberOfdice; j++)
+            {
+                numbers[j] = random.Next(1, 7);
+            }
+            return numbers;
         }
 
-        public static int[] DisplayAndSave (int[] dice )
+
+        public static int[] DisplayAndSave(int[] dice)
         {
             int[] saveDice = new int[dice.Length];
             int saveCount = 0;
             for (int i = 0; i < saveDice.Length; i++)
             {
-                Console.Write(dice[i]+ " ");
+                Console.Write(dice[i] + " ");
             }
-
+            Console.WriteLine();
+            Console.WriteLine("Lets start selecting your dice!");
             for (int i = 0; i < saveDice.Length; i++)
             {
                 Console.WriteLine(dice[i]);
                 Console.WriteLine("Do you wish to keep dice?");
-                string selection = Console.ReadLine();
-                if (selection == "Yes")
+                string selection = Console.ReadLine().ToUpper();
+
+                if (selection.StartsWith("Y"))
                 {
                     saveDice[saveCount] = dice[i];
                     saveCount++;
-                }               
+                }
             }
             int[] returnDice = new int[saveCount];
             if (saveCount > 0)
@@ -78,37 +108,88 @@ namespace ConsoleApp6
                     returnDice[i] = saveDice[i];
                 }
             }
-                return returnDice;
+            return returnDice;
         }
-        public static int Score (int[]savedDiceone, int[]savedDicetwo, int[]savedDicethree)
+        public static int[] PlayerComboforScore(int[] savedDiceone, int[] savedDicetwo, int[] savedDicethree)
         {
-            int[] Scores = new int[6];
+            int[] savedDice = new int[5];
+            int counter = 0;
             for (int i = 0; i < savedDiceone.Length; i++)
             {
-                Scores[savedDiceone[i]]++;
+                int die = savedDiceone[i];
+                savedDice[counter] = die;
+                counter++;
             }
             for (int i = 0; i < savedDicetwo.Length; i++)
             {
-                Scores[savedDicetwo[i]]++;
+                int die = savedDicetwo[i];
+                savedDice[counter] = die;
+                counter++;
             }
             for (int i = 0; i < savedDicethree.Length; i++)
-
             {
-                Scores[savedDicethree[i]]++;
+                int die = savedDicethree[i];
+                savedDice[counter] = die;
+                counter++;
             }
-            int finalScore = 0; 
-            for (int i = 0; i < Scores.Length; i++)
+            return savedDice;
+
+        }
+
+        public static int Score(int[] savedDice)
+        {
+            int finalScore = 0;
+            Array.Sort(savedDice);
+
+            foreach (int dice in savedDice)
             {
-                if (Scores[i] > finalScore)
+                Console.Write(dice);
+                Console.Write(' ');
+            }
+            int[] count = new int[6];
+
+
+            for (int i = 0; i < savedDice.Length; i++)
+            {
+                if (1 == savedDice[i])
                 {
-                    finalScore = Scores[i];                    
-                }   
-                  
+                    count[0]++;
+                }
+                if (2 == savedDice[i])
+                {
+                    count[1]++;
+                }
+                if (3 == savedDice[i])
+                {
+                    count[2]++;
+                }
+                if (4 == savedDice[i])
+                {
+                    count[3]++;
+                }
+                if (5 == savedDice[i])
+                {
+                    count[4]++;
+                }
+
+                if (6 == savedDice[i])
+                {
+                    count[5]++;
+                }
+            }
+
+
+            for (int i = 0; i < count.Length; i++)
+            {
+                if (count[i] > finalScore)
+                {
+                    finalScore = count[i];
+
+                }
             }
             return finalScore;
 
-   }
-
+        }
     }
 }
 
@@ -132,6 +213,48 @@ Print the winner with the tie going to the player.
     -Evaluate each of the rolls to see what the high score for each of the three rolls
 
     Compare the two to detrime who wins or if its a tie. 
+
+   private static int Winner()
+    while (true)
+    { 
+    int playerScore = GetPlayerScore(); 
+    int computer = GetComputerScore();
+
+    string winner = comptureScore > playerScore ? "computer" : "player";
+    Console.WriteLine($"The {winner} wins!");
+
+
+    Console.WriteLine("Type P to play again or Return to exit."); 
+    if(Console.ReadKey().Key ! = ConsoleKey.p)
+    {
+    break; 
+    }
+    }
+    
+    private static int GetComputerScore()
+    {
+  
+    }
+
+    private static int GetPlayerScore();
+    {
+            int[] firstRoll = RollDice(5);
+
+            int[] savefirstRollDice = DisplayAndSave(firstRoll);
+
+            Console.WriteLine("End of roll. Start next roll.");
+
+            int[] secondRoll = RollDice(5 - savefirstRollDice.Length);
+
+            int[] savesecondRollDice = DisplayAndSave(secondRoll);
+
+            int[] thridRoll = RollDice(5 - savefirstRollDice.Length - savesecondRollDice.Length);
+
+            int[] savethridRollDice = DisplayAndSave(thridRoll);
+
+            int finalScore = Score(savefirstRollDice, savesecondRollDice, savethridRollDice);
+    }
+
 
  */
 
